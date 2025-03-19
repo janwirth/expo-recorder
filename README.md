@@ -31,21 +31,36 @@ You might want to check out the individual installation instructions from this p
 ## Usage
 
 ```tsx
-import { View, Button } from 'react-native'
-import { Recorder, type RecorderRef } from '@lodev09/expo-recorder'
+import { View, Button, Alert } from "react-native";
+import { Recorder, type RecorderRef } from "@lodev09/expo-recorder";
+import { useRef } from "react";
+import { Audio } from "expo-av";
 
-const App = () => {
-  const recorder = useRef<RecorderRef>(null)
+export default function VoiceScreen() {
+  const recorder = useRef<RecorderRef>(null);
 
   const startRecording = async () => {
-    const record = await recorder.current?.startRecording()
-    console.log(record.uri)
-  }
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Audio recording permission is required"
+        );
+        return;
+      }
+
+      const record = await recorder.current?.startRecording();
+      console.log(record?.uri);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const stopRecording = async () => {
-    const record = await recorder.current?.stopRecording()
-    console.log(record.uri) // Save the uri somewhere! 🎉
-  }
+    const record = await recorder.current?.stopRecording();
+    console.log(record?.uri); // Save the uri somewhere! 🎉
+  };
 
   return (
     <View>
@@ -53,7 +68,7 @@ const App = () => {
       <Button title="Record" onPress={startRecording} />
       <Button title="Stop" onPress={stopRecording} />
     </View>
-  )
+  );
 }
 ```
 
